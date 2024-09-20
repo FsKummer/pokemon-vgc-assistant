@@ -22,10 +22,16 @@ services:
     environment:
       - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:${POSTGRES_PASSWORD}@postgres:5432/db
       - AIRFLOW__CORE__EXECUTOR=LocalExecutor
+      - LAKE_BUCKET=${LAKE_BUCKET}
+      - GOOGLE_APPLICATION_CREDENTIALS=${GOOGLE_APPLICATION_CREDENTIALS}
+      - BRONZE_DATA_SET_NAME=${BRONZE_DATA_SET_NAME}
+      - PROJECT_ID=${PROJECT_ID}
+      - GCLOUD_KEY_PATH={$GCLOUD_KEY_PATH}
     volumes:
       - ./dags:/app/airflow/dags
       - ./logs:/app/airflow/logs
       - ./data:/app/airflow/data
+      - ${GCLOUD_KEY_PATH}:${GOOGLE_APPLICATION_CREDENTIALS}
     depends_on:
       - postgres
     restart: on-failure

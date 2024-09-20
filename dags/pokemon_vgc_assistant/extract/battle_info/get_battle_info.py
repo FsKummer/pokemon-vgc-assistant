@@ -1,12 +1,12 @@
 import requests
 
 
-def _get_battle_info(battle_id: int) -> str:
+def _get_battle_info(battle_id: str) -> dict:
     """
-    Calls https://replay.pokemonshowdown.com/gen9vgc2024regh-<battle_id>.json
+    Calls https://replay.pokemonshowdown.com/<battle_id>.json
     and returns the json with the battle info and logs.
     """
-    url = f"https://replay.pokemonshowdown.com/gen9vgc2024regh-{battle_id}.json"
+    url = f"https://replay.pokemonshowdown.com/{battle_id}.json"
     response = requests.get(url)
     response.raise_for_status()  # Raise an exception for HTTP errors
 
@@ -15,10 +15,10 @@ def _get_battle_info(battle_id: int) -> str:
     if battle_info:
         return battle_info
     else:
-        raise ValueError("No battle found.")
+        raise ValueError(f"No battle found for ID: {battle_id}")
 
 def __main__():
-    battle_info = _get_battle_info(2201693665)
+    battle_info = _get_battle_info('gen9vgc2024regh-2201693665')
     print(battle_info)
 
 if __name__ == "__main__":
