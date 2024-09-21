@@ -13,6 +13,7 @@ pendulum = "^2"
 docutils = ">=0.16,<0.21"
 google-cloud-storage = "^2.18.2"
 apache-airflow-providers-google = "^10.22.0"
+pandas-gbq = "^0.23.1"
 
 [tool.poetry.dev-dependencies]
 ipython = "^8.4.0"
