@@ -1,12 +1,12 @@
-from dags.pokemon_vgc_assistant.transform.parse_logs import ParseLogs
+from pokemon_vgc_assistant.transform.parse_logs import ParseLogs
 import pandas as pd
 import os
 import json
+from google.cloud import bigquery
 
 PROJECT_ID = os.environ['PROJECT_ID']
 BRONZE_DATASET_NAME = os.environ['BRONZE_DATA_SET_NAME']
 SILVER_DATASET_NAME = os.environ['SILVER_DATA_SET_NAME']
-
 
 def fetch_data() -> pd.DataFrame:
     chunk_size = 1000
@@ -74,10 +74,10 @@ def transform_battles(battles: pd.DataFrame) -> None:
     )
 
 # Step 3: Main function to run the script
-def main():
+def perform_silver_transformation():
     fetch_data()
     print("Data transformation and loading complete.")
 
 # Execute the script
 if __name__ == '__main__':
-    main()
+    perform_silver_transformation()

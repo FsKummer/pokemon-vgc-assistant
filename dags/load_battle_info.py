@@ -1,8 +1,11 @@
 from airflow import DAG
 from airflow.providers.google.cloud.operators.bigquery import BigQueryInsertJobOperator
 from airflow.utils.dates import days_ago
+from airflow.operators.python import PythonOperator
 import os
 from datetime import datetime
+from pokemon_vgc_assistant.transform.transform_script_silver import perform_silver_transformation
+from pokemon_vgc_assistant.transform.transform_script_gold import perform_gold_transformation
 
 PROJECT_ID = os.getenv("PROJECT_ID")
 BRONZE_DATASET_NAME = os.getenv("BRONZE_DATA_SET_NAME")
@@ -29,7 +32,7 @@ with DAG(
         task_id='load_battle_data_to_bq',
         configuration={
             "load": {
-                "sourceUris": [f"gs://{LAKE_BUCKET}/battle_info/{year}/{month}/{day}/battle_info_1.csv"],
+                "sourceUris": [f"gs://{LAKE_BUCKET}/battle_info/{year}/{month}/{day}/battle_info_{year}_{month}_{day}.csv"],
                 "destinationTable": {
                     "projectId": PROJECT_ID,
                     "datasetId": BRONZE_DATASET_NAME,
@@ -42,21 +45,14 @@ with DAG(
         }
     )
 
-    append_battle_data = BigQueryInsertJobOperator(
-        task_id='append_battle_data_to_bq',
-        configuration={
-            "load": {
-                "sourceUris": [f"gs://{LAKE_BUCKET}/battle_info/{year}/{month}/{day}/battle_info_2.csv"],
-                "destinationTable": {
-                    "projectId": PROJECT_ID,
-                    "datasetId": BRONZE_DATASET_NAME,
-                    "tableId": "battles",
-                },
-                "sourceFormat": "CSV",
-                "writeDisposition": "WRITE_APPEND",
-                "autodetect": True
-            }
-        }
+    transform_battle_data_to_silver = PythonOperator(
+        task_id='transform_battle_data_to_silver',
+        python_callable=perform_silver_transformation,
     )
 
-    load_battle_data >> append_battle_data
+    transform_battle_data_to_gold = PythonOperator(
+        task_id='transform_battle_data_to_gold',
+        python_callable=perform_gold_transformation,
+    )
+
+    load_battle_data >> transform_battle_data_to_silver >> transform_battle_data_to_gold

@@ -3,6 +3,7 @@ import pendulum
 
 from airflow import DAG
 from airflow.operators.python import PythonOperator
+from airflow.operators.trigger_dagrun import TriggerDagRunOperator
 from pokemon_vgc_assistant.extract.battle_info.get_all_battles_ids import save_battle_ids_to_csv
 from pokemon_vgc_assistant.extract.battle_info.get_all_battle_info import process_battle_ids
 
@@ -13,8 +14,6 @@ AIRFLOW_HOME = os.getenv("AIRFLOW_HOME")
 with DAG(
     "pokemon_battles_info",
     description='A DAG to get and save battle logs from Pokemon battles from a specific format.',
-    schedule_interval='*0 0 * * *',
-    start_date = pendulum.yesterday(tz="UTC"),
     catchup=False,
     default_args={"depends_on_past": False}
 ) as dag:
@@ -34,4 +33,10 @@ with DAG(
         dag=dag,
     )
 
-    get_battle_ids >> get_battle_info
+    activate_load_battle_info_dag = TriggerDagRunOperator(
+        task_id='trigger_battle_load_dag',
+        trigger_dag_id='load_battle_info_to_bigquery',
+        dag=dag,
+    )
+
+    get_battle_ids >> get_battle_info >> activate_load_battle_info_dag

@@ -1,7 +1,6 @@
 import pandas as pd
 import os
 import json
-import pdb
 
 # Environment Variables
 PROJECT_ID = os.environ['PROJECT_ID']
@@ -71,7 +70,11 @@ def transform_battles(battles: pd.DataFrame) -> None:
                     "action_number": action_number,
                     "action_name": move.get("action", ""),
                     "move_name": move.get("move", ""),
+                    "item_name": move.get("item", ""),
                     "ability_name": move.get("ability", ""),
+                    "weather_name": move.get("weather", ""),
+                    "field_name": move.get("field", ""),
+                    "damage": move.get("damage", ""),
                     "actor_name": move.get("actor", ""),
                     "target_name": move.get("target", ""),
                     "player_name": move.get("player", ""),
@@ -126,10 +129,10 @@ def load_to_bigquery(df: pd.DataFrame, destination_table: str) -> None:
         print(f"No data to load into {destination_table}.")
 
 
-def main():
+def perform_gold_transformation():
     fetch_data()
     print("Data transformation and loading complete.")
 
 
 if __name__ == '__main__':
-    main()
+    perform_gold_transformation()
